@@ -15,8 +15,20 @@ public class RgbController {
         link = Links.getLink(URIs.newURI("ardulink://serial-jssc?port=" + comPort + "&baudrate=9600&pingprobe=false"));
     }
 
-    public void setRed(String redVal, String greenVal, String blueVal) throws IOException {
-        link.sendCustomMessage("wipe", redVal, greenVal, blueVal);
+    public void setColor(String redVal, String greenVal, String blueVal) throws IOException {
+        link.sendCustomMessage("colorOn", redVal, greenVal, blueVal);
+    }
+
+    public void wipeColor(String redVal, String greenVal, String blueVal, String delay) throws IOException {
+        link.sendCustomMessage("wipe", redVal, greenVal, blueVal, delay);
+    }
+
+    public void theaterChase(String redVal, String greenVal, String blueVal, String delay) throws IOException {
+        link.sendCustomMessage("theaterChase", redVal, greenVal, blueVal, delay);
+    }
+
+    public void allOff() throws IOException {
+        link.sendCustomMessage("off");
     }
 
 }

@@ -6,14 +6,18 @@ import javafx.event.ActionEvent;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class RgbControllerGUI  {
+    private Patterns pattern = new Patterns();
 
     private JFrame frame;
     private JPanel pane;
+    private JPanel pane2;
 
     // Slider Declaration
     private JSlider red;
@@ -25,6 +29,19 @@ public class RgbControllerGUI  {
     private JLabel greenLabel;
     private JLabel blueLabel;
 
+    private JButton stop;
+    private JButton taylor;
+    private JButton theatherChase;
+    private JButton coolPattern;
+    private JTextField coolPatternDelay;
+    private JTextField coolPatternR;
+    private JTextField coolPatternG;
+    private JTextField coolPatternB;
+    private JLabel cpDelayLabel;
+    private JLabel cpRLabel;
+    private JLabel cpGLabel;
+    private JLabel cpBLabel;
+
     private Integer redValue = 0;
     private Integer greenValue = 0;
     private Integer blueValue = 0;
@@ -35,6 +52,7 @@ public class RgbControllerGUI  {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         setUpSlider();
+        setUpButton();
 
         pane = new JPanel();
         pane.add(red);
@@ -46,7 +64,81 @@ public class RgbControllerGUI  {
         pane.add(blue);
         pane.add(blueLabel);
 
+        setUpSecondPane();
+
+        frame.setLayout(new GridLayout(2, 1));
+        frame.add(pane2);
         frame.add(pane);
+    }
+
+    private void setUpSecondPane() {
+        pane2 = new JPanel();
+        pane2.setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+
+        //Delay Label
+        c.gridx = 0;
+        c.gridy = 0;
+        pane2.add(cpDelayLabel, c);
+
+        // Red Label
+        c.gridx = 1;
+        c.gridy = 0;
+        pane2.add(cpRLabel, c);
+
+        //Green label
+        c.gridx = 2;
+        c.gridy = 0;
+        pane2.add(cpGLabel, c);
+
+        //Blue label
+        c.gridx = 3;
+        c.gridy = 0;
+        pane2.add(cpBLabel, c);
+
+        //Delay Input
+        c.gridx = 0;
+        c.gridy = 1;
+        pane2.add(coolPatternDelay, c);
+
+        //Red Input
+        c.gridx = 1;
+        c.gridy = 1;
+        pane2.add(coolPatternR, c);
+
+        //Green Input
+        c.gridx = 2;
+        c.gridy = 1;
+        pane2.add(coolPatternG, c);
+
+        //Blue Input
+        c.gridx = 3;
+        c.gridy = 1;
+        pane2.add(coolPatternB, c);
+
+        //Cool Pattern Button
+        c.gridx = 0;
+        c.gridy = 2;
+        c.gridwidth = 2;
+        pane2.add(coolPattern, c);
+
+        //Theather Chase Button
+        c.gridx = 2;
+        c.gridy = 2;
+        c.gridwidth = 2;
+        pane2.add(theatherChase, c);
+
+        //Taylor
+        c.gridx = 4;
+        c.gridy = 2;
+        c.gridwidth = 2;
+        pane2.add(taylor, c);
+
+        //Stop
+        c.gridx = 6;
+        c.gridy = 2;
+        c.gridwidth = 2;
+        pane2.add(stop, c);
     }
 
     // Sets up the sliders and the slider labels
@@ -77,6 +169,31 @@ public class RgbControllerGUI  {
         blueLabel = new JLabel("Blue: 0");
     }
 
+    private void setUpButton() {
+        coolPattern = new JButton("Cool Pattern!");
+        coolPattern.addActionListener(new ButtonListener());
+
+        coolPatternR = new JTextField(3);
+        coolPatternG = new JTextField(3);
+        coolPatternB = new JTextField(3);
+        coolPatternDelay = new JTextField(3);
+
+        cpRLabel = new JLabel("Red");
+        cpGLabel = new JLabel("Green");
+        cpBLabel = new JLabel("Blue");
+        cpDelayLabel = new JLabel("Delay");
+
+        theatherChase = new JButton("Theather Chase");
+        theatherChase.addActionListener(new ButtonListener());
+
+        taylor = new JButton("???");
+        taylor.addActionListener(new ButtonListener());
+
+        stop = new JButton("stop");
+        stop.addActionListener(new ButtonListener());
+
+    }
+
     public void display() {
         frame.pack();
         frame.setVisible(true);
@@ -95,10 +212,38 @@ public class RgbControllerGUI  {
             greenLabel.setText("Green: " + greenValue);
 
             try {
-                controller.setRed(redValue.toString(), greenValue.toString(), blueValue.toString());
+                controller.setColor(redValue.toString(), greenValue.toString(), blueValue.toString());
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
         }
+    }
+
+    private class ButtonListener implements ActionListener {
+        @Override
+        public void actionPerformed(java.awt.event.ActionEvent e) {
+            try {
+                if (e.getSource() == coolPattern) {
+                    controller.wipeColor(coolPatternR.getText(), coolPatternG.getText(), coolPatternB.getText(), coolPatternDelay.getText());
+                }
+                else if (e.getSource() == theatherChase) {
+                    controller.theaterChase(coolPatternR.getText(), coolPatternG.getText(), coolPatternB.getText(), coolPatternDelay.getText());
+                }
+                else if (e.getSource() == taylor) {
+                    pattern.playTSwizzle();
+                    TimeUnit.MILLISECONDS.sleep(200);
+                    pattern.coolPattern();
+                } else if (e.getSource() == stop) {
+                    pattern.stop();
+                }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            } catch (LineUnavailableException e1) {
+                e1.printStackTrace();
+            }
+        }
+
     }
 }
