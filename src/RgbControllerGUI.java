@@ -2,6 +2,9 @@
  * Created by Darwin on 12/29/2016.
  */
 import javafx.event.ActionEvent;
+import org.ardulink.core.events.RplyEvent;
+import org.ardulink.core.qos.ResponseAwaiter;
+import org.ardulink.gui.RGBController;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -33,6 +36,8 @@ public class RgbControllerGUI  {
     private JButton taylor;
     private JButton theatherChase;
     private JButton coolPattern;
+
+    private JTextField taylorDelay;
     private JTextField coolPatternDelay;
     private JTextField coolPatternR;
     private JTextField coolPatternG;
@@ -139,6 +144,12 @@ public class RgbControllerGUI  {
         c.gridy = 2;
         c.gridwidth = 2;
         pane2.add(stop, c);
+
+        //Taylor Delay
+        c.gridx = 2;
+        c.gridy = 3;
+        c.gridwidth = 2;
+        pane2.add(taylorDelay, c);
     }
 
     // Sets up the sliders and the slider labels
@@ -177,6 +188,7 @@ public class RgbControllerGUI  {
         coolPatternG = new JTextField(3);
         coolPatternB = new JTextField(3);
         coolPatternDelay = new JTextField(3);
+        taylorDelay = new JTextField(5);
 
         cpRLabel = new JLabel("Red");
         cpGLabel = new JLabel("Green");
@@ -197,6 +209,10 @@ public class RgbControllerGUI  {
     public void display() {
         frame.pack();
         frame.setVisible(true);
+    }
+
+    public int getTaylorDelay() {
+        return Integer.parseInt(taylorDelay.getText());
     }
 
     private class SlideListener implements ChangeListener {
@@ -227,12 +243,13 @@ public class RgbControllerGUI  {
                     controller.wipeColor(coolPatternR.getText(), coolPatternG.getText(), coolPatternB.getText(), coolPatternDelay.getText());
                 }
                 else if (e.getSource() == theatherChase) {
-                    controller.theaterChase(coolPatternR.getText(), coolPatternG.getText(), coolPatternB.getText(), coolPatternDelay.getText());
+                    controller.theaterChase(coolPatternR.getText(), coolPatternG.getText(), coolPatternB.getText(), coolPatternDelay.getText(), "3");
                 }
                 else if (e.getSource() == taylor) {
                     pattern.playTSwizzle();
                     TimeUnit.MILLISECONDS.sleep(200);
-                    pattern.coolPattern();
+                    pattern.setDelayTime(getTaylorDelay());
+                    pattern.beginThread();
                 } else if (e.getSource() == stop) {
                     pattern.stop();
                 }
@@ -244,6 +261,7 @@ public class RgbControllerGUI  {
                 e1.printStackTrace();
             }
         }
-
     }
+
+
 }

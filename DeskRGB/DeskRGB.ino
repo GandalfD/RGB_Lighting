@@ -63,13 +63,16 @@ void loop() {
       int rgSeperator = incomingStr.indexOf('/', cmdSeperator + 1);
       int gbSeperator = incomingStr.indexOf('/', rgSeperator + 1);
       int delaySeperator = incomingStr.indexOf('/', gbSeperator + 1);
+      int cycleSeperator = incomingStr.indexOf('/', delaySeperator+1);
       
       String cmd = incomingStr.substring(11,cmdSeperator);
       int r = (incomingStr.substring(cmdSeperator + 1, rgSeperator)).toInt();
       int g = (incomingStr.substring(rgSeperator + 1, gbSeperator)).toInt();
       int b = (incomingStr.substring(gbSeperator + 1, delaySeperator)).toInt();
-      int delayTime = (incomingStr.substring(delaySeperator + 1)).toInt();
+      int delayTime = (incomingStr.substring(delaySeperator + 1, cycleSeperator)).toInt();
+      int cycleTime = (incomingStr.substring(cycleSeperator+1)).toInt();
 
+//TODO: Make If/Else
       if (cmd.equals("colorOn")) {
         colorOn(strip.Color(r, g, b));
       }
@@ -79,16 +82,49 @@ void loop() {
       }
 
       if (cmd.equals("theaterChase")) {
-        theaterChase(strip.Color(r, g, b), delayTime);
+        theaterChase(strip.Color(r, g, b), delayTime, cycleTime);
       }
 
       if (cmd.equals("off")) {
         allOff();
       }
+
+      if (cmd.equals("theaterChaseOpp")) {
+        theaterChaseOpposite(strip.Color(r, g, b), delayTime, cycleTime);
+      }
+
+      if (cmd.equals("combine")) {
+        combine(strip.Color(r, g, b), delayTime);
+      }
+
+      if (cmd.equals("combineOpp")) {
+        combineOpposite(strip.Color(r, g, b), delayTime);
+      }
+
+      if (cmd.equals("wipeOpp")) {
+        colorWipeOpposite(strip.Color(r, g, b), delayTime);
+      } 
     }
   }
 }
 
+void combine(uint32_t c, uint8_t wait) {
+  for (int i = 0; i < (strip.numPixels() / 2) + 1; i++) {
+    strip.setPixelColor(i , c);
+    strip.setPixelColor(strip.numPixels() - i, c);
+    strip.show();
+    delay(wait);
+  }
+}
+
+void combineOpposite(uint32_t c, uint8_t wait) {
+  for (int i = 0; i < strip.numPixels() / 2; i++) {
+    strip.setPixelColor((strip.numPixels() / 2) - i, c);
+    strip.setPixelColor((strip.numPixels() / 2) + i, c);
+    strip.show();
+    delay(wait);
+  }
+}
 void colorOn(uint32_t c) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
@@ -107,6 +143,22 @@ void allOff() {
 void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
+    strip.show();
+    delay(wait);
+  }
+}
+
+void colorWipeOpposite(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(60 - i, c);
+    strip.show();
+    delay(wait);
+  }
+}
+
+void colorWipeOppositeOld(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(60 - i, c);
     strip.show();
     delay(wait);
   }
@@ -138,14 +190,31 @@ void rainbowCycle(uint8_t wait) {
 }
 
 //Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
+void theaterChase(uint32_t c, uint8_t wait, int cycles) {
+  for (int j=0; j<cycles; j++) {  //do 10 cycles of chasing
     for (int q=0; q < 3; q++) {
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
         strip.setPixelColor(i+q, c);    //turn every third pixel on
       }
       strip.show();
+      
+      delay(wait);
 
+      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, 0);        //turn every third pixel off
+      }
+    }
+  }
+}
+
+void theaterChaseOpposite(uint32_t c, uint8_t wait, int cycles) {
+  for (int j=0; j<cycles; j++) {  //do 10 cycles of chasing
+    for (int q=3; q > 0; q--) {
+      for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+        strip.setPixelColor(i+q, c);    //turn every third pixel on
+      }
+      strip.show();
+      
       delay(wait);
 
       for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
